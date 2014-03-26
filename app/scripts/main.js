@@ -27,7 +27,9 @@ require.config({
 });
 
 require([
-    'backbone'
-], function (Backbone) {
+    'backbone',
+    'routes/game'
+], function (Backbone, GameRouter) {
+    var router = new GameRouter();
     Backbone.history.start();
 });

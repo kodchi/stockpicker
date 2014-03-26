@@ -4,12 +4,22 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'templates'
-], function ($, _, Backbone, JST) {
+    'templates',
+    'models/game'
+], function ($, _, Backbone, JST, GameModel) {
     'use strict';
 
     var GameView = Backbone.View.extend({
-        template: JST['app/scripts/templates/game.ejs']
+        el: '.body',
+        template: JST['app/scripts/templates/game.ejs'],
+        initialize: function () {
+            this.model = new GameModel();
+            this.render();
+        },
+        render: function () {
+            this.$el.html(this.template(this.model.toJSON()));
+        }
+
     });
 
     return GameView;
