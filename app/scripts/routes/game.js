@@ -7,9 +7,14 @@ define([
 ], function ($, Backbone, GameView) {
     'use strict';
 
+    // https://designbye.wordpress.com/tag/historical-stock-quotes/
+
     var GameRouter = Backbone.Router.extend({
         routes: {
             '': 'home'
+        },
+
+        initialize: function () {
         },
 
         home: function () {

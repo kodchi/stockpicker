@@ -19,10 +19,11 @@ require.config({
         }
     },
     paths: {
-        jquery: '../bower_components/jquery/jquery',
-        backbone: '../bower_components/backbone/backbone',
-        underscore: '../bower_components/underscore/underscore',
-        bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
+        backbone: '../bower_components/backbone/backbone-min',
+        bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap.min',
+        d3: '../bower_components/d3/d3.min',
+        jquery: '../bower_components/jquery/jquery.min',
+        underscore: '../bower_components/underscore/underscore-min'
     }
 });
 
