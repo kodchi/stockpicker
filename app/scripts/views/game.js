@@ -6,26 +6,42 @@ define([
     'backbone',
     'd3',
     'templates',
+    'models/game',
     'models/quote',
     'collections/quote'
-], function ($, _, Backbone, d3, JST, QuoteModel, QuoteCollection) {
+], function ($, _, Backbone, d3, JST, GameModel, QuoteModel, QuoteCollection) {
     'use strict';
 
     var GameView = Backbone.View.extend({
         el: '.body',
 
-        template: JST['app/scripts/templates/game.ejs'],
+        indexTemplate: JST['app/scripts/templates/index.ejs'],
+        gameTemplate: JST['app/scripts/templates/game.ejs'],
 
         initialize: function () {
-            this.quotes = new QuoteCollection('MSFT', '2012-01-01', '2012-01-31');
-            this.quotes.fetch({async: false});
-            this.render();
+            console.log(this.model, 'ssshh');
+            this.model.on('change:symbol', this.updateQuotes, this);
+            _.bindAll(this, 'updateQuotes');
+//            this.render();
         },
 
         render: function () {
-            var that = this;
-            this.$el.html(this.template({'quotes': that.quotes}));
+            this.$el.html(this.indexTemplate({'model': this.model.toJSON()}));
+        },
+
+        renderGame: function () {
+            this.$el.html(this.gameTemplate({'model': this.model.toJSON()}));
             this.drawGraph();
+        },
+
+        updateQuotes: function () {
+            var quotes = new QuoteCollection(
+                this.model.get('symbol'),
+                '2012-01-01',
+                '2012-01-31'
+            );
+            quotes.fetch({async: false});
+            this.model.set('quotes', quotes);
         },
 
         drawGraph: function () {
@@ -68,7 +84,7 @@ define([
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var data = that.quotes.toJSON();
+            var data = this.model.get('quotes').toJSON();
             data.forEach(function (d) {
                 d.date = parseDate(d.Date);
                 d.close = +d.Close;
@@ -104,6 +120,12 @@ define([
 
             var totalLength = path.node().getTotalLength();
 
+            var timer,
+                i = 1,
+                timerCallback = function () {
+                    console.log(i++);
+                };
+
             path
                 .attr("stroke-dasharray", totalLength + ' ' + totalLength)
                 .attr("stroke-dashoffset", totalLength)
@@ -111,7 +133,13 @@ define([
                 // each day lasts 3 secs
                 .duration(data.length * 3000)
                 .ease("linear")
-                .attr("stroke-dashoffset", 0);
+                .attr("stroke-dashoffset", 0)
+                .each('start', function () {
+                    timer = setInterval(timerCallback, 4000);
+                })
+                .each('end', function () {
+                    clearTimeout(timer);
+                });
 
         }
     });

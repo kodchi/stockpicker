@@ -1,0 +1,8 @@
+<span id="money"><%= model.money %></span>
+<ul id="symbols">
+    <% for (var i = 0, l = model.symbols.length; i < l; i++) { %>
+    <li><a href="/game/<%= model.symbols[i] %>"><%= model.symbols[i] %></a></li>
+    <% } %>
+</ul>
+
+

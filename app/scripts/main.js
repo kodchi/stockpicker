@@ -32,5 +32,5 @@ require([
     'routes/game'
 ], function (Backbone, GameRouter) {
     var router = new GameRouter();
-    Backbone.history.start();
+    Backbone.history.start({pushState: true});
 });

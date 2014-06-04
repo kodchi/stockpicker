@@ -13,6 +13,19 @@ var mountFolder = function (connect, dir) {
 // 'test/spec/**/*.js'
 // templateFramework: 'lodash'
 
+var pushStateHook = function (url) {
+    var path = require('path');
+    var request = require('request'); // Need to be added into package.json
+    return function (req, res, next) {
+        var ext = path.extname(req.url);
+        if ((ext == "" || ext === ".html") && req.url != "/") {
+            req.pipe(request(url)).pipe(res);
+        } else {
+            next();
+        }
+    };
+};
+
 module.exports = function (grunt) {
     // show elapsed time at the end
     require('time-grunt')(grunt);
@@ -72,12 +85,14 @@ module.exports = function (grunt) {
             options: {
                 port: SERVER_PORT,
                 // change this to '0.0.0.0' to access the server from outside
-                hostname: 'localhost'
+//                hostname: 'localhost'
+                hostname: '0.0.0.0'
             },
             livereload: {
                 options: {
                     middleware: function (connect) {
                         return [
+                            pushStateHook("http://0.0.0.0:9000"),
                             lrSnippet,
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, yeomanConfig.app)
