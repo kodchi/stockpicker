@@ -23,10 +23,9 @@ define([
         },
 
         initialize: function () {
-            console.log(this.model, 'ssshh');
             this.model.on('change:symbol', this.updateQuotes, this);
-            this.model.on('change:quote', this.updatePortfolio, this);
-            this.model.on('change:cash change:stock', this.updateUserStatus, this)
+            this.model.on('change:date', this.updatePortfolio, this);
+            this.model.on('change:cash change:stock', this.updateUserStatus, this);
             _.bindAll(this, 'createAction');
 //            this.render();
         },
@@ -42,7 +41,7 @@ define([
 
         createAction: function (event) {
             this.model.set('action', parseInt($(event.target).data('action')));
-            console.log(this.model.get('action'));
+            console.log('action = ', this.model.get('action'), 'cash = ', this.model.get('cash'));
         },
 
         updateUserStatus: function (event) {
@@ -51,16 +50,105 @@ define([
         },
 
         updatePortfolio: function () {
-            if (!this.model.get('action')) {
-                return;
+            if (this.model.get('action')) {
+                var cash = this.model.get('cash'),
+                    stock = this.model.get('stock'),
+                    action = this.model.get('action'),
+                    quote = this.model.get('quote');
+
+                var actionTotal = action * quote;
+
+                if (actionTotal > 0) {
+                    // buying stocks
+                    if (cash >= actionTotal) {
+                        // enough money to buy all stocks
+                        this.model.set({
+                            'cash': cash - actionTotal,
+                            'stock': stock + action
+                        });
+                        console.log('Bought ' + action + ' stocks at $' + quote +
+                            ' for $' + actionTotal + '.');
+                    } else {
+                        // # of stocks that couldn't be bought
+                        var returnStocks = Math.ceil((actionTotal - cash) / quote);
+                        // buy however much cash is left
+                        this.model.set({
+                            'cash': cash - (action - returnStocks) * quote,
+                            'stock': stock + action - returnStocks
+                        });
+                        console.log('Bought only ' + (action - returnStocks) +
+                            ' stocks at $' + quote + ' for $' +
+                            ((action - returnStocks) * quote) + '.');
+                    }
+                } else {
+                    // selling or short selling
+                    if ((stock >=0) && (stock + action >= 0)) {
+                        // selling
+                        this.model.set({
+                            'cash': cash + Math.abs(action) * quote,
+                            'stock': stock + action
+                        });
+                        console.log('Sold ' + Math.abs(action) +
+                            ' stocks at $' + quote + 'for $' +
+                            Math.abs(action) * quote +'.');
+                    } else {
+                        var short,
+                            availableCash;
+                        // first sell however number of stocks we have ...
+                        if (stock > 0) {
+                            console.log('Sold ' + stock +
+                                ' stocks at $' + quote + ' for $' +
+                                (stock * quote) + '.');
+                            cash -= stock * quote;
+                            stock = 0;
+                            short = Math.abs(stock + action);
+                            availableCash = cash;
+                        } else if (stock < 0) {
+                            availableCash = cash + 2 * stock * quote;
+                            short = Math.abs(action);
+                        } else {
+                            availableCash = cash;
+                            short = Math.abs(action);
+                        }
+
+                        // ... then short sell however amount of cash we have
+                        var shortAmount = short * quote,
+                            returnAmount = shortAmount - availableCash;
+                        if (returnAmount <= 0) {
+                            // we have enough cash to short everything
+                            cash += shortAmount;
+                            stock -= short;
+                            console.log('Shorted ' + short +
+                                ' stocks at $' + quote + ' for $' +
+                                (short * quote) + '.');
+                        } else if (availableCash > 0) {
+                            // we can only short $availableCash
+                            short = Math.floor(availableCash / quote);
+                            cash += short * quote;
+                            stock -= short;
+                            console.log('Shorted only ' + short +
+                                ' stocks at $' + quote + ' for $' +
+                                short * quote + '.');
+                        }
+                        this.model.set({
+                            'cash': cash,
+                            'stock': stock
+                        });
+                    }
+                }
+                // clear action
+                this.model.set('action', undefined);
             }
-            var stockPrice = this.model.get('action') * this.model.get('quote');
-            this.model.set({
-                cash: this.model.get('cash') - stockPrice,
-                stock: this.model.get('stock') + this.model.get('action')
-            });
-            // clear action
-            this.model.set('action', undefined);
+
+            // do final calculations
+            if (this.model.get('finish')) {
+                this.model.set('cash',
+                    this.model.get('cash') +
+                    this.model.get('stock') *
+                    this.model.get('quote')
+                );
+                this.model.set('stock', 0);
+            }
         },
 
         updateQuotes: function () {
@@ -70,6 +158,7 @@ define([
                 '2012-01-31'
             );
             quotes.fetch({async: false});
+            // todo reset model
             this.model.set('quotes', quotes);
         },
 
@@ -99,8 +188,6 @@ define([
                 .scale(y)
                 .orient("left")
                 .ticks(3);
-
-
 
             var svg = d3.select("#graph").append("svg")
                 .attr("width", width + margin.left + margin.right)
@@ -145,7 +232,7 @@ define([
                 .append('circle')
                 .transition()
                 .delay(function (d, i) {
-                    return i * 2000;
+                    return i * 500;
                 })
                 .attr({
                     'class': 'circle',
@@ -158,7 +245,11 @@ define([
                     }
                 })
                 .each('end', function (d, i) {
-                    that.model.set('quote', d.close);
+                    that.model.set({
+                        'quote': d.close,
+                        'date': d.date,
+                        'finish': (i + 1 === data.length)
+                    });
                     // connect dots
                     if (d1) {
                         connectCircles(d1, d);
