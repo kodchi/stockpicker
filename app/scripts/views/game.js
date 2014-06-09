@@ -152,11 +152,22 @@ define([
         },
 
         updateQuotes: function () {
-            var quotes = new QuoteCollection(
+            var beginningDate = new Date(2000, 0, 1),
+                today = new Date(),
+                startDate = new Date(beginningDate.getTime() + Math.random() * (today.getTime() - beginningDate.getTime())),
+                // clone startDate
+                endDate = new Date(startDate.getTime()),
+                quotes;
+
+            endDate.setDate(endDate.getDate() + 30); // add 30 days
+
+            quotes = new QuoteCollection(
                 this.model.get('symbol'),
-                '2012-01-01',
-                '2012-01-31'
+                startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate(),
+                endDate.getFullYear() + '/' + (endDate.getMonth() + 1) + '/' + endDate.getDate()
             );
+            console.log(startDate, endDate);
+
             quotes.fetch({async: false});
             // todo reset model
             this.model.set('quotes', quotes);
@@ -180,7 +191,7 @@ define([
                 .scale(x)
                 .orient("bottom")
                 .tickFormat(function (d) {
-                    return (d.getMonth() + 1) + '/' + d.getDate();
+                    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
                 })
                 .ticks(3);
 
