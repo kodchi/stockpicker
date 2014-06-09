@@ -33,7 +33,7 @@ define([
                 var that = this;
                 setTimeout(function () {
                     that.fetch({async: false});
-                }, 3000);
+                }, 5000);
             } else {
                 return data.query.results.quote;
             }
