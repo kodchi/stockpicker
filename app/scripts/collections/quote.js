@@ -27,7 +27,17 @@ define([
         },
 
         parse: function (data) {
-            return data.query.results.quote;
+            if (data.query.results === null) {
+                // try reloading data after 3 secs
+                console.log('reloading data');
+                var that = this;
+                setTimeout(function () {
+                    that.fetch({async: false});
+                }, 3000);
+            } else {
+                return data.query.results.quote;
+            }
+//            return (((data || {}).query || {}).results || {}).quote || [];
         }
     });
 

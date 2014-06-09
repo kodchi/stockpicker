@@ -23,7 +23,7 @@ define([
         },
 
         initialize: function () {
-            this.model.on('change:symbol', this.updateQuotes, this);
+//            this.model.on('change:symbol', this.updateQuotes, this);
             this.model.on('change:date', this.updatePortfolio, this);
             this.model.on('change:cash change:stock', this.updateUserStatus, this);
             _.bindAll(this, 'createAction');
@@ -35,6 +35,7 @@ define([
         },
 
         renderGame: function () {
+            this.updateQuotes();
             this.$el.html(this.gameTemplate({'model': this.model.toJSON()}));
             this.drawGraph();
         },
@@ -159,14 +160,13 @@ define([
                 endDate = new Date(startDate.getTime()),
                 quotes;
 
-            endDate.setDate(endDate.getDate() + 30); // add 30 days
+            endDate.setDate(endDate.getDate() + 100); // add 100 days
 
             quotes = new QuoteCollection(
                 this.model.get('symbol'),
                 startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate(),
                 endDate.getFullYear() + '/' + (endDate.getMonth() + 1) + '/' + endDate.getDate()
             );
-            console.log(startDate, endDate);
 
             quotes.fetch({async: false});
             // todo reset model
@@ -206,7 +206,8 @@ define([
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var data = this.model.get('quotes').toJSON();
+            // get only the first 30 quotes
+            var data = this.model.get('quotes').toJSON().slice(0, 30);
             data.forEach(function (d) {
                 d.date = parseDate(d.Date);
                 d.close = +d.Close;
