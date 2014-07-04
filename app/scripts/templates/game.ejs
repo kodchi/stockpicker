@@ -27,16 +27,20 @@
 <br/>
 Cash: <span id="cash"><%= model.cash %></span>
 <br/>
-Stock: <span id="stock"><%= model.stock %></span>
+Stock: <span id="stock"><%= model.stock %> ($<%= model.stock * model.quote %>)</span>
 
 <div id="graph"></div>
 
 <ul id="actions">
-    <% for (var i = -500; i <= 500; i += 100) { %>
-        <% if (i !== 0) { %>
-            <li data-action="<%= i %>">
-                <%= (i < 0) ? 'sell ' + Math.abs(i): 'buy ' + i %>
-            </li>
-        <% } %>
+    <li class="action" data-action="sell">
+        sell
+    </li>
+    <% for (var i = 0; i <= 100; i += 25) { %>
+        <li class="amount" data-amount="<%= i %>">
+            <%= i %>%
+        </li>
     <% } %>
+    <li class="action" data-action="buy">
+        buy
+    </li>
 </ul>

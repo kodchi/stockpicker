@@ -25,3 +25,5 @@ have an option for different intervals, not just daily
 
 make the graph height bigger than it is because if the graph goes down to the
 minimum point then it is obvious that there is no way to go down anymore
+
+landscape orientation lock

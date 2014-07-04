@@ -16,8 +16,8 @@ define([
             // each user has this much money in the beginning
             cash: 5000,
             stock: 0,
-            // action can be 100, -100, or any other whole number
-            // meaning buy 100, sell 100 of stocks at the 'quote' price
+            // action can be -0, -25, -50, -75, -100 % or their positive values
+            // negative means sell, positive - buy
             action: null,
             // default list of symbols
             symbols: [

@@ -28,6 +28,7 @@ define([
 
         parse: function (data) {
             if (data.query.results === null) {
+                // todo: redo this section, limit the number of tries to 3
                 // try reloading data after 3 secs
                 console.log('reloading data');
                 var that = this;

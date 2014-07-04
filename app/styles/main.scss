@@ -89,3 +89,20 @@ body {
         border-bottom: 0;
     }
 }
+
+#actions {
+  .action {
+    cursor: default;
+    color: grey;
+    &.on {
+      cursor: pointer;
+      color: black;
+    }
+  }
+  .amount {
+    padding: 2px 5px;
+    &.on {
+      background-color: #c4e3f3;
+    }
+  }
+}
